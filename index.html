@@ -1,82 +1,169 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta name="generator" content="Hugo 0.58.0" />
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/fonts.css">
-    
+    <meta name="description" content="Harsh Parmar — software engineer focused on backend systems, authentication, and scalable services.">
+
     <title>Harsh Parmar</title>
     <link rel="icon" type="image/png" href="/img/favicon.ico" />
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
         integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <script src="/js/dark.js" defer=""></script>
 </head>
 
 <body>
-	<h1 class="heading-main" >Harsh Parmar</h1>
+    <header>
+        <h1 class="name">Harsh Parmar</h1>
+        <p class="tagline">Software Engineer &mdash; backend, authentication, and scalable systems.</p>
+    </header>
 
-	<h4>Hello! As a skilled web developer, I utilize cutting-edge tools and frameworks to create effective and innovative solutions. My primary expertise lies in back-end development, but I also possess experience in front-end development, data science, system programming, and compiler design. As a passionate and curious learner, I am always eager to explore new areas in technology and stay up-to-date with industry advancements. Since completing my studies, I have continued to expand my knowledge and experience in the tech industry, allowing me to refine my skills and contribute to various projects. Outside of my professional pursuits, I am an avid reader with a deep affection for novels. Recently, I have ventured into the world of writing, embracing the opportunity to express my thoughts and ideas through the written word.</h4>
+    <section id="about">
+        <p>
+            I'm a software engineer at <a href="https://toddleapp.com" target="_blank" rel="noopener">Toddle</a>,
+            where I work on authentication infrastructure, SAML/OAuth integrations, and scalable backend services.
+            I focus on designing systems that balance reliability, performance, and developer ergonomics &mdash;
+            and I enjoy owning features end-to-end, from scoping through deployment.
+        </p>
+    </section>
 
-	<table>
-		
-		
-<tr>
-    <td><i class="fab fa-github" aria-hidden="true"></i></td>
-    <td>&nbsp;<a href="https://github.com/sourcificer/" target="_blank">GitHub</a></td>
-</tr>
+    <section id="experience">
+        <h2>Experience</h2>
 
+        <article class="role">
+            <header class="role-header">
+                <div>
+                    <h3>Software Engineer &middot; <span class="company">Toddle</span></h3>
+                </div>
+                <span class="period">Jul 2023 &ndash; Present</span>
+            </header>
+            <ul>
+                <li>Spearheaded scoping and development of a new, scalable authentication architecture, introducing custom login pages with tailored branding and authentication methods for clients.</li>
+                <li>Implemented SAML and OAuth authentication, enabling integrations with Google, Microsoft, and other identity providers for secure access management.</li>
+                <li>Led the development, activation, and maintenance of a key feature heavily requested by 200+ clients, significantly enhancing product functionality and customer satisfaction.</li>
+                <li>Scoped, mentored, and managed the lifecycle of multiple features from conception to deployment, providing guidance to team members through transitions.</li>
+            </ul>
+        </article>
 
-		
-		
-<tr>
-    <td><i class="fab fa-twitter" aria-hidden="true"></i></td>
-    <td>&nbsp;<a href="https://twitter.com/sourcificer/" target="_blank">Twitter</a></td>
-</tr>
+        <article class="role">
+            <header class="role-header">
+                <div>
+                    <h3>Associate Software Engineer &middot; <span class="company">Toddle</span></h3>
+                </div>
+                <span class="period">Sep 2022 &ndash; Jul 2023</span>
+            </header>
+            <ul>
+                <li>Developed an automated client onboarding system that significantly reduced the time required to onboard new customers.</li>
+                <li>Built and maintained robust, scalable backend systems to ensure high performance and reliability.</li>
+                <li>Authored technical documentation and trained new team members, improving knowledge transfer and team productivity.</li>
+                <li>Conducted regular code reviews and drove best practices to maintain code quality across the team.</li>
+            </ul>
+        </article>
 
+        <article class="role">
+            <header class="role-header">
+                <div>
+                    <h3>Software Development Engineer &middot; <span class="company">Pathfndr</span></h3>
+                </div>
+                <span class="period">Feb 2022 &ndash; Aug 2022</span>
+            </header>
+            <ul>
+                <li>Performed technical analyses and built new features and microservices for a rapidly growing business.</li>
+                <li>Worked closely with the Project Manager and CTO on the architecture and delivery of multiple microservices.</li>
+            </ul>
+        </article>
 
-		
-		
-<tr>
-    <td><i class="fab fa-goodreads" aria-hidden="true"></i></td>
-    <td>&nbsp;<a href="https://www.goodreads.com/sourcificer/" target="_blank">Goodreads</a></td>
-</tr>
+        <article class="role">
+            <header class="role-header">
+                <div>
+                    <h3>Software Developer Intern &middot; <span class="company">Slick Technologies</span></h3>
+                </div>
+                <span class="period">Aug 2020 &ndash; Nov 2020</span>
+            </header>
+            <ul>
+                <li>Designed and developed robust APIs in coordination with frontend developers, producing well-tested, high-quality code.</li>
+                <li>Built automation tooling that managed infrastructure without manual intervention.</li>
+            </ul>
+        </article>
+    </section>
 
+    <section id="projects">
+        <h2>Projects</h2>
 
-		
-		
-<tr>
-    <td><i class="fab fa-linkedin" aria-hidden="true"></i></td>
-    <td>&nbsp;<a href="https://www.linkedin.com/in/sourcificer/" target="_blank">LinkedIn</a></td>
-</tr>
+        <article class="project">
+            <h3>Fake News Verification System</h3>
+            <p>
+                A web app that takes an article URL, cross-references it against a real-time set of similar articles,
+                and uses regression models to estimate how closely the general trend of reporting agrees with the given
+                article. Built on top of a link scraper that collects related news using keyword extraction.
+            </p>
+        </article>
 
+        <article class="project">
+            <h3>Practice Tests for Competitive Exams</h3>
+            <p>
+                A web platform that lets students practice MCQs for competitive exams like JEE and NEET. Scraped question
+                banks from public sources and structured them into a clean data model to power timed practice sessions.
+            </p>
+        </article>
 
-		
-		<tr>
-			
-			<td><i class="fas fa-file-alt" aria-hidden="true"></i></td>
-			<td>&nbsp;<a href="/resume/Resume.pdf" target="_blank">Resume</a></td>
-			
-		</tr>
-		<tr>
-			
-			<td><i class="fas fa-envelope" aria-hidden="true"></i></td>
-			<td>&nbsp;<a href="mailto:imharpar@gmail.com"><code>imharpar@gmail.com</code></a></td>
-			
-		</tr>
-	</table>
+        <article class="project">
+            <h3>Mining Calculator</h3>
+            <p>
+                A calculator that estimates Bitcoin mining profitability using hash rate, block reward, power consumption,
+                and cost per kWh, to help determine whether mining is worthwhile under a given set of conditions.
+            </p>
+        </article>
+    </section>
 
-	
+    <section id="skills">
+        <h2>Skills</h2>
+        <dl class="skills">
+            <dt>Languages</dt>
+            <dd>Python, JavaScript, Go, C++, PHP, C#, Java</dd>
 
-		
-		
+            <dt>Databases</dt>
+            <dd>PostgreSQL, MySQL, MongoDB, SQLite</dd>
 
+            <dt>Frameworks &amp; Tools</dt>
+            <dd>Django, Django REST, Node.js, React, Flask, Laravel, Docker, Kubernetes, Redis, Celery, Git, SAML</dd>
+        </dl>
+    </section>
 
-		
-	
+    <section id="education">
+        <h2>Education</h2>
+        <article class="role">
+            <header class="role-header">
+                <div>
+                    <h3>B.E. Computer Science &middot; <span class="company">Gujarat Technological University</span></h3>
+                </div>
+                <span class="period">2017 &ndash; 2021</span>
+            </header>
+            <p class="education-detail">CGPA: 9.25 / 10.0</p>
+        </article>
+    </section>
+
+    <section id="honors">
+        <h2>Honors</h2>
+        <ul class="honors">
+            <li>Essential Google Cloud Infrastructure: Foundation &mdash; Certification, 2020</li>
+            <li>Gujarat Industrial Hackathon &mdash; Regional Qualifier, 2018</li>
+        </ul>
+    </section>
+
+    <section id="contact">
+        <h2>Contact</h2>
+        <ul class="contact">
+            <li>
+                <i class="fab fa-github" aria-hidden="true"></i>
+                <a href="https://github.com/sourcificer/" target="_blank" rel="noopener">github.com/sourcificer</a>
+            </li>
+            <li>
+                <i class="fab fa-linkedin" aria-hidden="true"></i>
+                <a href="https://www.linkedin.com/in/sourcificer/" target="_blank" rel="noopener">linkedin.com/in/sourcificer</a>
+            </li>
+        </ul>
+    </section>
 </body>
-
 </html>
