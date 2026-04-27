@@ -4,166 +4,299 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Harsh Parmar — software engineer focused on backend systems, authentication, and scalable services.">
+    <meta name="description" content="Harsh Parmar — backend engineer at Toddle. Authentication, onboarding, and the infrastructure that's invisible when it works.">
+    <meta name="color-scheme" content="dark light">
 
-    <title>Harsh Parmar</title>
+    <meta property="og:title" content="Harsh Parmar — Backend Engineer">
+    <meta property="og:description" content="Backend engineer at Toddle. Authentication, onboarding, and the infrastructure that's invisible when it works.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sourcificer.github.io/">
+    <meta name="twitter:card" content="summary">
+
+    <title>Harsh Parmar — Backend Engineer</title>
     <link rel="icon" type="image/png" href="/img/favicon.ico" />
+    <link rel="canonical" href="https://sourcificer.github.io/">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
-        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
 </head>
 
 <body>
     <header>
+        <p class="prompt"><span class="prompt-mark">~$</span> whoami</p>
         <h1 class="name">Harsh Parmar</h1>
-        <p class="tagline">Software Engineer &mdash; backend, authentication, and scalable systems.</p>
+        <p class="tagline">
+            Backend engineer at <a href="https://toddleapp.com" target="_blank" rel="noopener">Toddle</a>.
+            I work on authentication, onboarding, and the kind of infrastructure that&rsquo;s
+            invisible when it&rsquo;s working.
+        </p>
     </header>
 
-    <section id="about">
+    <section id="now">
+        <h2><span class="label-prefix">//</span> Now</h2>
+        <p class="now-date">April 2026</p>
         <p>
-            I'm a software engineer at <a href="https://toddleapp.com" target="_blank" rel="noopener">Toddle</a>,
-            where I work on authentication infrastructure, SAML/OAuth integrations, and scalable backend services.
-            I focus on designing systems that balance reliability, performance, and developer ergonomics &mdash;
-            and I enjoy owning features end-to-end, from scoping through deployment.
+            Shipping MFA at Toddle and migrating our long-running task system to Temporal.
+            Reading more about identity federation and the long tail of
+            <em>&ldquo;what if the IdP returns garbage.&rdquo;</em>
+        </p>
+    </section>
+
+    <section id="work">
+        <h2><span class="label-prefix">//</span> Selected Work</h2>
+
+        <article class="case-study">
+            <header class="case-header">
+                <h3>Per-org Login Architecture</h3>
+                <span class="period">Toddle &middot; 2023&ndash;2024</span>
+            </header>
+            <p>
+                Toddle had one global login page serving every school. As we added SSO providers,
+                the page got crowded &mdash; and every new provider for an existing school still
+                required an engineer to flip a flag in the database. We needed per-org login pages
+                that could scale with the SSO catalogue, gate access at the org level (so disabling
+                a method for a school actually disabled it, even on the global URL), and stay
+                performant across <strong>500+ organisations</strong> running mixes of Google,
+                Microsoft, and custom IdPs.
+            </p>
+            <p>
+                We shipped a per-org login surface that admins configure themselves, with
+                method-level allowlisting enforced server-side regardless of which login URL
+                a user hits. The global page still works for orgs that prefer it.
+            </p>
+            <p class="impact">
+                <span class="impact-label">Impact &mdash;</span>
+                Eliminated a recurring manual-ticket workflow that was consuming
+                <strong>~15 engineer-hours/month</strong> across the org base; SSO enablement
+                went from a ticket queue measured in hours to a self-serve toggle measured
+                in seconds.
+            </p>
+            <p class="redo">
+                <span class="redo-label">What I&rsquo;d redo &mdash;</span>
+                The admin-side setup UX. The architecture is solid, but a first-time admin
+                without docs has to think harder than they should. Information design over
+                engineering on the next pass.
+            </p>
+        </article>
+
+        <article class="case-study">
+            <header class="case-header">
+                <h3>Generic SAML &amp; OAuth Integration</h3>
+                <span class="period">Toddle &middot; 2023&ndash;2024</span>
+            </header>
+            <p>
+                Before this work, Toddle&rsquo;s &ldquo;SSO&rdquo; meant Google or Microsoft OAuth.
+                Anything else was a one-off engineering project. Schools running Okta, Azure AD
+                via SAML, ADFS, or any other standards-compliant IdP were stuck. We built generic
+                SAML and OAuth integration paths that admins configure end-to-end without
+                engineering involvement, working against any compliant provider.
+            </p>
+
+            <figure class="diagram" aria-labelledby="saml-fig-caption">
+                <svg viewBox="0 0 640 260" role="img" aria-label="SP-initiated SAML flow between User, Toddle, and IdP" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Lane labels -->
+                    <g class="lane-label">
+                        <text x="80" y="22" text-anchor="middle">User</text>
+                        <text x="320" y="22" text-anchor="middle">Toddle (SP)</text>
+                        <text x="560" y="22" text-anchor="middle">IdP</text>
+                    </g>
+
+                    <!-- Lifelines -->
+                    <g class="lifeline">
+                        <line x1="80" y1="36" x2="80" y2="240"/>
+                        <line x1="320" y1="36" x2="320" y2="240"/>
+                        <line x1="560" y1="36" x2="560" y2="240"/>
+                    </g>
+
+                    <!-- Step 1: User -> SP -->
+                    <g class="flow">
+                        <line x1="80" y1="60" x2="320" y2="60" marker-end="url(#arr)"/>
+                        <text x="200" y="54" text-anchor="middle" class="flow-label">GET /login</text>
+                    </g>
+
+                    <!-- Step 2: SP -> User: 302 + SAMLRequest -->
+                    <g class="flow">
+                        <line x1="320" y1="95" x2="80" y2="95" marker-end="url(#arr)"/>
+                        <text x="200" y="89" text-anchor="middle" class="flow-label">302 &mdash; SAMLRequest</text>
+                    </g>
+
+                    <!-- Step 3: User -> IdP -->
+                    <g class="flow">
+                        <line x1="80" y1="130" x2="560" y2="130" marker-end="url(#arr)"/>
+                        <text x="320" y="124" text-anchor="middle" class="flow-label">redirect, authenticate</text>
+                    </g>
+
+                    <!-- Step 4: IdP -> User: 302 + SAMLResponse -->
+                    <g class="flow">
+                        <line x1="560" y1="165" x2="80" y2="165" marker-end="url(#arr)"/>
+                        <text x="320" y="159" text-anchor="middle" class="flow-label">302 &mdash; signed SAMLResponse</text>
+                    </g>
+
+                    <!-- Step 5: User -> SP: POST -->
+                    <g class="flow">
+                        <line x1="80" y1="200" x2="320" y2="200" marker-end="url(#arr)"/>
+                        <text x="200" y="194" text-anchor="middle" class="flow-label">POST /acs</text>
+                    </g>
+
+                    <!-- SP final action -->
+                    <g class="note">
+                        <rect x="335" y="184" width="220" height="34" rx="3"/>
+                        <text x="445" y="206" text-anchor="middle">verify sig &middot; map attrs &middot; session</text>
+                    </g>
+                </svg>
+                <figcaption id="saml-fig-caption">
+                    SP-initiated SAML. The same shape, with different parameters, drives the OAuth path.
+                </figcaption>
+            </figure>
+
+            <p>
+                The integration handles the parts that are easy to get subtly wrong:
+                signature validation, clock-skew tolerance, NameID handling, attribute mapping,
+                and the edge cases that only appear when you talk to real-world IdPs.
+            </p>
+            <p class="impact">
+                <span class="impact-label">Impact &mdash;</span>
+                Moved Toddle from two hardcoded IdPs to <strong>any standards-compliant SAML or
+                OAuth provider</strong>, configured by admins without engineering involvement.
+                Removed identity integration as a procurement blocker for enterprise-tier customers.
+            </p>
+            <p class="redo">
+                <span class="redo-label">What I&rsquo;d redo &mdash;</span>
+                The SAML library choice. It works, but its abstractions leak in places I&rsquo;d
+                rather they didn&rsquo;t and the docs are thin. The alternatives at the time
+                weren&rsquo;t better &mdash; that doesn&rsquo;t make me happier about the dependency.
+                The admin UX has the same first-time-user gap as the per-org login work.
+            </p>
+        </article>
+
+        <article class="case-study">
+            <header class="case-header">
+                <h3>Self-serve Client Onboarding</h3>
+                <span class="period">Toddle &middot; 2022&ndash;2023</span>
+            </header>
+            <p>
+                Onboarding a new school meant migrating student, staff, parent, and class data
+                from their SIS into Toddle &mdash; and previously, that meant an engineer running
+                database updates by hand, often with several rounds of back-and-forth with the
+                school to fix data shape issues. Slow for the school, expensive for engineering,
+                a bottleneck on growth.
+            </p>
+            <p>
+                I worked on a self-serve rostering module: schools configure their own migration,
+                monitor progress, control settings, and (with a later cron-based optimisation
+                I was part of) opt into automatic recurring sync. PRD, scoping, UX, and
+                implementation were all in scope.
+            </p>
+            <p class="impact">
+                <span class="impact-label">Impact &mdash;</span>
+                Removed developer-in-the-loop from the rostering happy path. New schools
+                onboard themselves; engineering only gets pulled in for genuinely unusual
+                source-data shapes.
+            </p>
+            <p class="redo">
+                <span class="redo-label">What I&rsquo;d redo &mdash;</span>
+                Honestly, less than I&rsquo;d like &mdash; later design iterations haven&rsquo;t
+                found a meaningfully simpler shape. That&rsquo;s either a good sign or a sign
+                I should look harder.
+            </p>
+        </article>
+
+        <p class="also">
+            Also at Toddle: MFA implementation, a Temporal-based replacement for our long-running
+            task architecture, and a handful of smaller authn/authz pieces along the way.
         </p>
     </section>
 
     <section id="experience">
-        <h2>Experience</h2>
+        <h2><span class="label-prefix">//</span> Experience</h2>
 
         <article class="role">
             <header class="role-header">
-                <div>
-                    <h3>Software Engineer &middot; <span class="company">Toddle</span></h3>
-                </div>
+                <h3>Software Engineer <span class="dot">&middot;</span> <span class="company">Toddle</span></h3>
                 <span class="period">Jul 2023 &ndash; Present</span>
             </header>
             <ul>
-                <li>Spearheaded scoping and development of a new, scalable authentication architecture, introducing custom login pages with tailored branding and authentication methods for clients.</li>
-                <li>Implemented SAML and OAuth authentication, enabling integrations with Google, Microsoft, and other identity providers for secure access management.</li>
-                <li>Led the development, activation, and maintenance of a key feature heavily requested by 200+ clients, significantly enhancing product functionality and customer satisfaction.</li>
-                <li>Scoped, mentored, and managed the lifecycle of multiple features from conception to deployment, providing guidance to team members through transitions.</li>
+                <li>Led design and delivery of the per-org login architecture serving 500+ schools, including SAML/OAuth self-serve configuration for any standards-compliant IdP.</li>
+                <li>Owned features end-to-end: scoping, design, implementation, rollout, and handoff. Mentored teammates through the lifecycle of multiple projects.</li>
+                <li>Currently shipping MFA and migrating our long-running task system to Temporal.</li>
             </ul>
         </article>
 
         <article class="role">
             <header class="role-header">
-                <div>
-                    <h3>Associate Software Engineer &middot; <span class="company">Toddle</span></h3>
-                </div>
+                <h3>Associate Software Engineer <span class="dot">&middot;</span> <span class="company">Toddle</span></h3>
                 <span class="period">Sep 2022 &ndash; Jul 2023</span>
             </header>
             <ul>
-                <li>Developed an automated client onboarding system that significantly reduced the time required to onboard new customers.</li>
-                <li>Built and maintained robust, scalable backend systems to ensure high performance and reliability.</li>
-                <li>Authored technical documentation and trained new team members, improving knowledge transfer and team productivity.</li>
-                <li>Conducted regular code reviews and drove best practices to maintain code quality across the team.</li>
+                <li>Built the self-serve client onboarding/rostering module that removed developer-in-the-loop from the standard onboarding flow.</li>
+                <li>Maintained backend services for performance and reliability; authored docs and onboarded new engineers.</li>
             </ul>
         </article>
 
-        <article class="role">
+        <article class="role compact">
             <header class="role-header">
-                <div>
-                    <h3>Software Development Engineer &middot; <span class="company">Pathfndr</span></h3>
-                </div>
+                <h3>Software Development Engineer <span class="dot">&middot;</span> <span class="company">Pathfndr</span></h3>
                 <span class="period">Feb 2022 &ndash; Aug 2022</span>
             </header>
-            <ul>
-                <li>Performed technical analyses and built new features and microservices for a rapidly growing business.</li>
-                <li>Worked closely with the Project Manager and CTO on the architecture and delivery of multiple microservices.</li>
-            </ul>
+            <p class="role-summary">Microservices and feature work for a fast-growing travel-tech product, working closely with PM and CTO on architecture.</p>
         </article>
 
-        <article class="role">
+        <article class="role compact">
             <header class="role-header">
-                <div>
-                    <h3>Software Developer Intern &middot; <span class="company">Slick Technologies</span></h3>
-                </div>
+                <h3>Software Developer Intern <span class="dot">&middot;</span> <span class="company">Slick Technologies</span></h3>
                 <span class="period">Aug 2020 &ndash; Nov 2020</span>
             </header>
-            <ul>
-                <li>Designed and developed robust APIs in coordination with frontend developers, producing well-tested, high-quality code.</li>
-                <li>Built automation tooling that managed infrastructure without manual intervention.</li>
-            </ul>
-        </article>
-    </section>
-
-    <section id="projects">
-        <h2>Projects</h2>
-
-        <article class="project">
-            <h3>Fake News Verification System</h3>
-            <p>
-                A web app that takes an article URL, cross-references it against a real-time set of similar articles,
-                and uses regression models to estimate how closely the general trend of reporting agrees with the given
-                article. Built on top of a link scraper that collects related news using keyword extraction.
-            </p>
-        </article>
-
-        <article class="project">
-            <h3>Practice Tests for Competitive Exams</h3>
-            <p>
-                A web platform that lets students practice MCQs for competitive exams like JEE and NEET. Scraped question
-                banks from public sources and structured them into a clean data model to power timed practice sessions.
-            </p>
-        </article>
-
-        <article class="project">
-            <h3>Mining Calculator</h3>
-            <p>
-                A calculator that estimates Bitcoin mining profitability using hash rate, block reward, power consumption,
-                and cost per kWh, to help determine whether mining is worthwhile under a given set of conditions.
-            </p>
+            <p class="role-summary">API design and infrastructure automation tooling.</p>
         </article>
     </section>
 
     <section id="skills">
-        <h2>Skills</h2>
+        <h2><span class="label-prefix">//</span> Stack</h2>
         <dl class="skills">
             <dt>Languages</dt>
-            <dd>Python, JavaScript, Go, C++, PHP, C#, Java</dd>
+            <dd>Python, JavaScript, Go</dd>
 
-            <dt>Databases</dt>
-            <dd>PostgreSQL, MySQL, MongoDB, SQLite</dd>
+            <dt>Data</dt>
+            <dd>PostgreSQL, MongoDB, Redis</dd>
 
-            <dt>Frameworks &amp; Tools</dt>
-            <dd>Django, Django REST, Node.js, React, Flask, Laravel, Docker, Kubernetes, Redis, Celery, Git, SAML</dd>
+            <dt>Infra &amp; tools</dt>
+            <dd>Docker, Kubernetes, Temporal, Celery, SAML, OAuth 2.0</dd>
         </dl>
     </section>
 
     <section id="education">
-        <h2>Education</h2>
-        <article class="role">
+        <h2><span class="label-prefix">//</span> Education</h2>
+        <article class="role compact">
             <header class="role-header">
-                <div>
-                    <h3>B.E. Computer Science &middot; <span class="company">Gujarat Technological University</span></h3>
-                </div>
+                <h3>B.E. Computer Science <span class="dot">&middot;</span> <span class="company">Gujarat Technological University</span></h3>
                 <span class="period">2017 &ndash; 2021</span>
             </header>
-            <p class="education-detail">CGPA: 9.25 / 10.0</p>
+            <p class="role-summary">CGPA 9.25 / 10.0. Essential Google Cloud Infrastructure: Foundation (2020). Regional qualifier, Gujarat Industrial Hackathon (2018).</p>
         </article>
     </section>
 
-    <section id="honors">
-        <h2>Honors</h2>
-        <ul class="honors">
-            <li>Essential Google Cloud Infrastructure: Foundation &mdash; Certification, 2020</li>
-            <li>Gujarat Industrial Hackathon &mdash; Regional Qualifier, 2018</li>
-        </ul>
-    </section>
-
     <section id="contact">
-        <h2>Contact</h2>
+        <h2><span class="label-prefix">//</span> Contact</h2>
         <ul class="contact">
             <li>
-                <i class="fab fa-github" aria-hidden="true"></i>
+                <span class="contact-key">github</span>
                 <a href="https://github.com/sourcificer/" target="_blank" rel="noopener">github.com/sourcificer</a>
             </li>
             <li>
-                <i class="fab fa-linkedin" aria-hidden="true"></i>
+                <span class="contact-key">linkedin</span>
                 <a href="https://www.linkedin.com/in/sourcificer/" target="_blank" rel="noopener">linkedin.com/in/sourcificer</a>
             </li>
         </ul>
     </section>
+
+    <footer>
+        <p>
+            <span class="footer-mark">~$</span> built with HTML, CSS, and a healthy distrust of identity providers.
+        </p>
+    </footer>
 </body>
 </html>
