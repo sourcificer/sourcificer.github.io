@@ -305,6 +305,20 @@ strong { color: var(--text); font-weight: 600; }
   fill: var(--text);
 }
 
+/* Back-channel (server-to-server) hops read as dashed */
+.diagram .flow.backchannel line {
+  stroke-dasharray: 5 3;
+  opacity: 0.85;
+}
+
+.diagram .side-note {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  fill: var(--text-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .diagram figcaption {
   font-family: var(--font-mono);
   font-size: 0.78rem;
@@ -356,6 +370,37 @@ strong { color: var(--text); font-weight: 600; }
   white-space: nowrap;
   letter-spacing: 0.02em;
 }
+
+/* Role progression within one company */
+ol.role-track {
+  list-style: none;
+  margin: 0.75rem 0 1rem;
+  padding: 0 0 0 0.9rem;
+  border-left: 2px solid var(--rule-strong);
+  display: grid;
+  gap: 0.3rem;
+}
+
+ol.role-track li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+ol.role-track .track-title {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* Current role reads as the live one */
+ol.role-track li:first-child .track-title {
+  color: var(--text);
+  font-weight: 600;
+}
+
+ol.role-track li:first-child::marker { content: none; }
 
 .role ul {
   margin: 0.5rem 0 0;
