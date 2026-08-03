@@ -4,16 +4,16 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Harsh Parmar — backend engineer at Toddle. Authentication, onboarding, and the infrastructure that's invisible when it works.">
+    <meta name="description" content="Harsh Parmar — senior backend engineer at Toddle. Authentication, integration, and orchestration systems in Node.js and Python.">
     <meta name="color-scheme" content="dark light">
 
-    <meta property="og:title" content="Harsh Parmar — Backend Engineer">
-    <meta property="og:description" content="Backend engineer at Toddle. Authentication, onboarding, and the infrastructure that's invisible when it works.">
+    <meta property="og:title" content="Harsh Parmar — Senior Backend Engineer">
+    <meta property="og:description" content="Senior backend engineer at Toddle. Authentication, integration, and orchestration systems — and lately, the identity provider other systems authenticate against.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sourcificer.github.io/">
     <meta name="twitter:card" content="summary">
 
-    <title>Harsh Parmar — Backend Engineer</title>
+    <title>Harsh Parmar — Senior Backend Engineer</title>
     <link rel="icon" type="image/png" href="/img/favicon.ico" />
     <link rel="canonical" href="https://sourcificer.github.io/">
     <link rel="stylesheet" href="/css/style.css">
@@ -24,19 +24,19 @@
         <p class="prompt"><span class="prompt-mark">~$</span> whoami</p>
         <h1 class="name">Harsh Parmar</h1>
         <p class="tagline">
-            Backend engineer at <a href="https://toddleapp.com" target="_blank" rel="noopener">Toddle</a>.
-            I work on authentication, onboarding, and the kind of infrastructure that&rsquo;s
-            invisible when it&rsquo;s working.
+            Senior backend engineer at <a href="https://toddleapp.com" target="_blank" rel="noopener">Toddle</a>.
+            I build authentication, integration, and orchestration systems &mdash; and lately,
+            the identity provider that other systems authenticate against.
         </p>
     </header>
 
     <section id="now">
         <h2><span class="label-prefix">//</span> Now</h2>
-        <p class="now-date">April 2026</p>
+        <p class="now-date">August 2026</p>
         <p>
-            Shipping MFA at Toddle and migrating our long-running task system to Temporal.
-            Reading more about identity federation and the long tail of
-            <em>&ldquo;what if the IdP returns garbage.&rdquo;</em>
+            Leading the design of a unified OIDC identity provider at Toddle &mdash;
+            authorization-code flow, silent SSO, and the account-linking edge cases that only
+            surface once real users turn out to have three accounts they&rsquo;d forgotten about.
         </p>
     </section>
 
@@ -45,131 +45,229 @@
 
         <article class="case-study">
             <header class="case-header">
-                <h3>Per-org Login Architecture</h3>
-                <span class="period">Toddle &middot; 2023&ndash;2024</span>
+                <h3>Becoming an Identity Provider</h3>
+                <span class="period">Toddle &middot; 2024&ndash;present</span>
             </header>
             <p>
-                Toddle had one global login page serving every school. As we added SSO providers,
-                the page got crowded &mdash; and every new provider for an existing school still
-                required an engineer to flip a flag in the database. We needed per-org login pages
-                that could scale with the SSO catalogue, gate access at the org level (so disabling
-                a method for a school actually disabled it, even on the global URL), and stay
-                performant across <strong>500+ organisations</strong> running mixes of Google,
-                Microsoft, and custom IdPs.
+                Toddle spent years on one side of the federation boundary: a service provider,
+                consuming assertions from Google, Microsoft, Okta, and whatever a district
+                happened to run. But schools increasingly wanted single sign-on <em>into</em>
+                partner tools, and our own growing set of internal properties each needed an
+                auth surface. Consuming identity was no longer enough &mdash; we had to issue it.
             </p>
             <p>
-                We shipped a per-org login surface that admins configure themselves, with
-                method-level allowlisting enforced server-side regardless of which login URL
-                a user hits. The global page still works for orgs that prefer it.
+                We evolved the SSO platform into a full identity provider, issuing SAML assertions
+                and OAuth tokens to third-party and internal applications, and extended platform
+                sign-in to internal company properties through a global OAuth audience. I&rsquo;m
+                now leading the design of a unified OIDC provider on top of that: I authored the
+                full design spec &mdash; authorization-code flow, silent SSO, verified-email
+                account linking &mdash; and I&rsquo;m guiding the implementation.
             </p>
+
+            <figure class="diagram" aria-labelledby="oidc-fig-caption">
+                <svg viewBox="0 0 640 300" role="img" aria-label="OIDC authorization-code flow with Toddle acting as the identity provider" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+                        </marker>
+                    </defs>
+
+                    <g class="lane-label">
+                        <text x="70" y="22" text-anchor="middle">User</text>
+                        <text x="320" y="22" text-anchor="middle">Third-party app</text>
+                        <text x="570" y="22" text-anchor="middle">Toddle (IdP)</text>
+                    </g>
+
+                    <g class="lifeline">
+                        <line x1="70" y1="36" x2="70" y2="284"/>
+                        <line x1="320" y1="36" x2="320" y2="284"/>
+                        <line x1="570" y1="36" x2="570" y2="284"/>
+                    </g>
+
+                    <g class="flow">
+                        <line x1="70" y1="62" x2="320" y2="62" marker-end="url(#arr2)"/>
+                        <text x="195" y="56" text-anchor="middle" class="flow-label">GET /login</text>
+                    </g>
+
+                    <g class="flow">
+                        <line x1="320" y1="96" x2="70" y2="96" marker-end="url(#arr2)"/>
+                        <text x="195" y="90" text-anchor="middle" class="flow-label">302 &mdash; authz request</text>
+                    </g>
+
+                    <g class="flow">
+                        <line x1="70" y1="130" x2="570" y2="130" marker-end="url(#arr2)"/>
+                        <text x="320" y="124" text-anchor="middle" class="flow-label">authenticate &mdash; or silent SSO</text>
+                    </g>
+
+                    <g class="flow">
+                        <line x1="570" y1="164" x2="70" y2="164" marker-end="url(#arr2)"/>
+                        <text x="320" y="158" text-anchor="middle" class="flow-label">302 &mdash; authorization code</text>
+                    </g>
+
+                    <g class="flow">
+                        <line x1="70" y1="198" x2="320" y2="198" marker-end="url(#arr2)"/>
+                        <text x="195" y="192" text-anchor="middle" class="flow-label">GET /callback?code</text>
+                    </g>
+
+                    <g class="flow backchannel">
+                        <line x1="320" y1="238" x2="570" y2="238" marker-end="url(#arr2)"/>
+                        <text x="445" y="232" text-anchor="middle" class="flow-label">POST /token</text>
+                    </g>
+
+                    <g class="flow backchannel">
+                        <line x1="570" y1="270" x2="320" y2="270" marker-end="url(#arr2)"/>
+                        <text x="445" y="264" text-anchor="middle" class="flow-label">id_token &middot; access_token</text>
+                    </g>
+
+                    <text x="632" y="256" text-anchor="end" class="side-note">back channel</text>
+                </svg>
+                <figcaption id="oidc-fig-caption">
+                    Same protocol family as the diagram below &mdash; opposite side of the arrow.
+                </figcaption>
+            </figure>
+
             <p class="impact">
                 <span class="impact-label">Impact &mdash;</span>
-                Eliminated a recurring manual-ticket workflow that was consuming
-                <strong>~15 engineer-hours/month</strong> across the org base; SSO enablement
-                went from a ticket queue measured in hours to a self-serve toggle measured
-                in seconds.
+                Toddle now sits on <strong>both sides of the federation boundary</strong>:
+                consuming external IdPs for school sign-in, and acting as one for third-party
+                and internal applications.
             </p>
             <p class="redo">
                 <span class="redo-label">What I&rsquo;d redo &mdash;</span>
-                The admin-side setup UX. The architecture is solid, but a first-time admin
-                without docs has to think harder than they should. Information design over
-                engineering on the next pass.
+                Account linking. Verified-email linking is the pragmatic choice and it&rsquo;s
+                what we shipped, but it quietly inherits the trust assumptions of whoever
+                verified that email. I&rsquo;d like a stronger story there than
+                &ldquo;the upstream IdP said so.&rdquo;
             </p>
         </article>
 
         <article class="case-study">
             <header class="case-header">
-                <h3>Generic SAML &amp; OAuth Integration</h3>
+                <h3>Self-serve SSO, From Scratch</h3>
                 <span class="period">Toddle &middot; 2023&ndash;2024</span>
             </header>
             <p>
-                Before this work, Toddle&rsquo;s &ldquo;SSO&rdquo; meant Google or Microsoft OAuth.
-                Anything else was a one-off engineering project. Schools running Okta, Azure AD
-                via SAML, ADFS, or any other standards-compliant IdP were stuck. We built generic
-                SAML and OAuth integration paths that admins configure end-to-end without
-                engineering involvement, working against any compliant provider.
+                When I picked this up, &ldquo;SSO&rdquo; at Toddle meant Google or Microsoft OAuth,
+                hardcoded. Anything else &mdash; Okta, Azure AD over SAML, ADFS, a district&rsquo;s
+                in-house IdP &mdash; was a bespoke engineering project. On top of that, every school
+                shared one global login page, so as the provider list grew the page got crowded, and
+                enabling an already-supported provider for a school <em>still</em> required an
+                engineer to flip a flag in the database.
+            </p>
+            <p>
+                I built the company&rsquo;s first generic SAML and OAuth integrations, working
+                against any standards-compliant provider, plus a self-serve login page customisation
+                system: per-org branding, per-org auth methods, configured by admins without
+                engineering involvement. Method-level allowlisting is enforced server-side, so
+                disabling a method for a school actually disables it &mdash; including on the global
+                login URL. The global page still works for orgs that prefer it.
             </p>
 
             <figure class="diagram" aria-labelledby="saml-fig-caption">
-                <svg viewBox="0 0 640 260" role="img" aria-label="SP-initiated SAML flow between User, Toddle, and IdP" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 640 260" role="img" aria-label="SP-initiated SAML flow between User, Toddle, and an external IdP" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                             <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
                         </marker>
                     </defs>
 
-                    <!-- Lane labels -->
                     <g class="lane-label">
                         <text x="80" y="22" text-anchor="middle">User</text>
                         <text x="320" y="22" text-anchor="middle">Toddle (SP)</text>
-                        <text x="560" y="22" text-anchor="middle">IdP</text>
+                        <text x="560" y="22" text-anchor="middle">External IdP</text>
                     </g>
 
-                    <!-- Lifelines -->
                     <g class="lifeline">
                         <line x1="80" y1="36" x2="80" y2="240"/>
                         <line x1="320" y1="36" x2="320" y2="240"/>
                         <line x1="560" y1="36" x2="560" y2="240"/>
                     </g>
 
-                    <!-- Step 1: User -> SP -->
                     <g class="flow">
                         <line x1="80" y1="60" x2="320" y2="60" marker-end="url(#arr)"/>
                         <text x="200" y="54" text-anchor="middle" class="flow-label">GET /login</text>
                     </g>
 
-                    <!-- Step 2: SP -> User: 302 + SAMLRequest -->
                     <g class="flow">
                         <line x1="320" y1="95" x2="80" y2="95" marker-end="url(#arr)"/>
                         <text x="200" y="89" text-anchor="middle" class="flow-label">302 &mdash; SAMLRequest</text>
                     </g>
 
-                    <!-- Step 3: User -> IdP -->
                     <g class="flow">
                         <line x1="80" y1="130" x2="560" y2="130" marker-end="url(#arr)"/>
                         <text x="320" y="124" text-anchor="middle" class="flow-label">redirect, authenticate</text>
                     </g>
 
-                    <!-- Step 4: IdP -> User: 302 + SAMLResponse -->
                     <g class="flow">
                         <line x1="560" y1="165" x2="80" y2="165" marker-end="url(#arr)"/>
                         <text x="320" y="159" text-anchor="middle" class="flow-label">302 &mdash; signed SAMLResponse</text>
                     </g>
 
-                    <!-- Step 5: User -> SP: POST -->
                     <g class="flow">
                         <line x1="80" y1="200" x2="320" y2="200" marker-end="url(#arr)"/>
                         <text x="200" y="194" text-anchor="middle" class="flow-label">POST /acs</text>
                     </g>
 
-                    <!-- SP final action -->
                     <g class="note">
                         <rect x="335" y="184" width="220" height="34" rx="3"/>
                         <text x="445" y="206" text-anchor="middle">verify sig &middot; map attrs &middot; session</text>
                     </g>
                 </svg>
                 <figcaption id="saml-fig-caption">
-                    SP-initiated SAML. The same shape, with different parameters, drives the OAuth path.
+                    SP-initiated SAML. The integration handles signature validation, clock skew,
+                    NameID handling, and attribute mapping.
                 </figcaption>
             </figure>
 
-            <p>
-                The integration handles the parts that are easy to get subtly wrong:
-                signature validation, clock-skew tolerance, NameID handling, attribute mapping,
-                and the edge cases that only appear when you talk to real-world IdPs.
-            </p>
             <p class="impact">
                 <span class="impact-label">Impact &mdash;</span>
-                Moved Toddle from two hardcoded IdPs to <strong>any standards-compliant SAML or
-                OAuth provider</strong>, configured by admins without engineering involvement.
-                Removed identity integration as a procurement blocker for enterprise-tier customers.
+                Moved Toddle from two hardcoded providers to <strong>any standards-compliant SAML
+                or OAuth IdP</strong>, and eliminated a manual-ticket workflow that was consuming
+                <strong>~15 engineer-hours/month</strong> across <strong>500+ organisations</strong>.
+                SSO enablement went from a ticket queue measured in hours to a toggle measured in
+                seconds &mdash; and identity integration stopped being a procurement blocker for
+                enterprise deals.
             </p>
             <p class="redo">
                 <span class="redo-label">What I&rsquo;d redo &mdash;</span>
-                The SAML library choice. It works, but its abstractions leak in places I&rsquo;d
-                rather they didn&rsquo;t and the docs are thin. The alternatives at the time
-                weren&rsquo;t better &mdash; that doesn&rsquo;t make me happier about the dependency.
-                The admin UX has the same first-time-user gap as the per-org login work.
+                Two things. The SAML library: it works, but its abstractions leak and the docs are
+                thin &mdash; the alternatives at the time weren&rsquo;t better, which doesn&rsquo;t
+                make me happier about the dependency. And the admin setup UX: an admin who has
+                configured SSO before will follow it fine, but a first-timer without docs has to
+                think harder than they should. Information design over engineering on that pass.
+            </p>
+        </article>
+
+        <article class="case-study">
+            <header class="case-header">
+                <h3>Workflow Orchestration on Temporal</h3>
+                <span class="period">Toddle &middot; 2024&ndash;2026</span>
+            </header>
+            <p>
+                Long-running work &mdash; data syncs, bulk exports, migrations &mdash; ran on a
+                homegrown long-running-task architecture that was hard to observe and harder to
+                recover. Retries were ad hoc, partial failures left inconsistent state, and every
+                team that needed a background job reinvented the same scaffolding slightly
+                differently.
+            </p>
+            <p>
+                I designed and built a workflow orchestration framework on Temporal with progress
+                tracking, automatic retries, and graceful degradation built in, so teams get
+                durability without hand-rolling it. It&rsquo;s since been adopted by multiple teams
+                to run long-running background jobs reliably across regions.
+            </p>
+            <p class="impact">
+                <span class="impact-label">Impact &mdash;</span>
+                Became the standard path for long-running work at Toddle, <strong>adopted by
+                multiple teams</strong> across regions &mdash; replacing per-team scaffolding with
+                one durable, observable framework.
+            </p>
+            <p class="redo">
+                <span class="redo-label">What I&rsquo;d redo &mdash;</span>
+                The abstraction leans toward flexibility over opinion. Teams can express almost
+                any workflow shape, which also means the framework can&rsquo;t always tell them
+                when they&rsquo;ve expressed one badly. I&rsquo;d trade some of that generality
+                for guardrails.
             </p>
         </article>
 
@@ -179,23 +277,23 @@
                 <span class="period">Toddle &middot; 2022&ndash;2023</span>
             </header>
             <p>
-                Onboarding a new school meant migrating student, staff, parent, and class data
-                from their SIS into Toddle &mdash; and previously, that meant an engineer running
-                database updates by hand, often with several rounds of back-and-forth with the
-                school to fix data shape issues. Slow for the school, expensive for engineering,
-                a bottleneck on growth.
+                Onboarding a school meant migrating student, staff, parent, and class data out of
+                their SIS &mdash; PowerSchool, Clever, Veracross, iSAMS, or something in-house &mdash;
+                and into Toddle. Previously that meant an engineer running database updates by hand,
+                usually across several rounds of back-and-forth to fix data-shape issues. Slow for
+                the school, expensive for engineering, and a hard ceiling on how fast we could grow.
             </p>
             <p>
                 I worked on a self-serve rostering module: schools configure their own migration,
-                monitor progress, control settings, and (with a later cron-based optimisation
-                I was part of) opt into automatic recurring sync. PRD, scoping, UX, and
-                implementation were all in scope.
+                monitor its progress, control the related settings, and opt into automatic recurring
+                sync. PRD, scoping, UX, and implementation were all in scope. I also optimised the
+                cron scheduling behind it to cut AWS Lambda invocations during peak hours.
             </p>
             <p class="impact">
                 <span class="impact-label">Impact &mdash;</span>
-                Removed developer-in-the-loop from the rostering happy path. New schools
-                onboard themselves; engineering only gets pulled in for genuinely unusual
-                source-data shapes.
+                Removed developer-in-the-loop from the rostering happy path for a network of
+                <strong>200+ schools</strong>. Engineering now only gets pulled in for genuinely
+                unusual source data.
             </p>
             <p class="redo">
                 <span class="redo-label">What I&rsquo;d redo &mdash;</span>
@@ -206,8 +304,10 @@
         </article>
 
         <p class="also">
-            Also at Toddle: MFA implementation, a Temporal-based replacement for our long-running
-            task architecture, and a handful of smaller authn/authz pieces along the way.
+            Also at Toddle: an async document-generation platform on AWS (Lambda, SQS, S3) that
+            replaced timeout-prone synchronous downloads; a Slack-integrated release approval system
+            that now gates every production release; MFA; a passwordless parent signup flow with
+            child-scoped invite tokens; and a lot of production incident response.
         </p>
     </section>
 
@@ -216,24 +316,22 @@
 
         <article class="role">
             <header class="role-header">
-                <h3>Software Engineer <span class="dot">&middot;</span> <span class="company">Toddle</span></h3>
-                <span class="period">Jul 2023 &ndash; Present</span>
+                <h3><span class="company">Toddle</span></h3>
+                <span class="period">Sep 2022 &ndash; Present</span>
             </header>
+            <ol class="role-track">
+                <li><span class="track-title">Senior Software Engineer</span><span class="period">Jul 2026 &ndash; Present</span></li>
+                <li><span class="track-title">Software Engineer 2</span><span class="period">Jul 2024 &ndash; Jul 2026</span></li>
+                <li><span class="track-title">Software Engineer</span><span class="period">Jul 2023 &ndash; Jul 2024</span></li>
+                <li><span class="track-title">Associate Software Engineer</span><span class="period">Sep 2022 &ndash; Jul 2023</span></li>
+            </ol>
             <ul>
-                <li>Led design and delivery of the per-org login architecture serving 500+ schools, including SAML/OAuth self-serve configuration for any standards-compliant IdP.</li>
-                <li>Owned features end-to-end: scoping, design, implementation, rollout, and handoff. Mentored teammates through the lifecycle of multiple projects.</li>
-                <li>Currently shipping MFA and migrating our long-running task system to Temporal.</li>
-            </ul>
-        </article>
-
-        <article class="role">
-            <header class="role-header">
-                <h3>Associate Software Engineer <span class="dot">&middot;</span> <span class="company">Toddle</span></h3>
-                <span class="period">Sep 2022 &ndash; Jul 2023</span>
-            </header>
-            <ul>
-                <li>Built the self-serve client onboarding/rostering module that removed developer-in-the-loop from the standard onboarding flow.</li>
-                <li>Maintained backend services for performance and reliability; authored docs and onboarded new engineers.</li>
+                <li>Leading the design of a unified OIDC identity provider &mdash; authored the full design spec (authorization-code flow, silent SSO, verified-email account linking) and guiding its implementation.</li>
+                <li>Evolved the SSO platform from a consumer of external identity providers into a full identity provider, issuing SAML assertions and OAuth tokens to third-party and internal applications while scaling enterprise SSO onboarding.</li>
+                <li>Built a Temporal-based workflow orchestration framework &mdash; progress tracking, automatic retries, graceful degradation &mdash; adopted by multiple teams for long-running jobs across regions.</li>
+                <li>Built an async document-generation platform on AWS and a Slack-integrated release approval system that gates every production release; own and oversee patch and minor release pipelines across core repositories.</li>
+                <li>Maintain data synchronisation for a network of 200+ schools, including sync-driven role and permission assignment, manual-override preservation, and academic-year rollovers.</li>
+                <li>Primary responder for production auth and integration incidents &mdash; triaged and resolved 100+ customer-facing issues using Sentry and application logs.</li>
             </ul>
         </article>
 
@@ -242,15 +340,7 @@
                 <h3>Software Development Engineer <span class="dot">&middot;</span> <span class="company">Pathfndr</span></h3>
                 <span class="period">Feb 2022 &ndash; Aug 2022</span>
             </header>
-            <p class="role-summary">Microservices and feature work for a fast-growing travel-tech product, working closely with PM and CTO on architecture.</p>
-        </article>
-
-        <article class="role compact">
-            <header class="role-header">
-                <h3>Software Developer Intern <span class="dot">&middot;</span> <span class="company">Slick Technologies</span></h3>
-                <span class="period">Aug 2020 &ndash; Nov 2020</span>
-            </header>
-            <p class="role-summary">API design and infrastructure automation tooling.</p>
+            <p class="role-summary">Customer-facing features including a Book Now Pay Later payment flow, and ownership of production microservices in a fast release cycle supporting expansion into new markets.</p>
         </article>
     </section>
 
@@ -258,13 +348,19 @@
         <h2><span class="label-prefix">//</span> Stack</h2>
         <dl class="skills">
             <dt>Languages</dt>
-            <dd>Python, JavaScript, Go</dd>
+            <dd>JavaScript / TypeScript, Python</dd>
+
+            <dt>Backend</dt>
+            <dd>Node.js, Express, GraphQL, REST, gRPC, Temporal, Celery, Django</dd>
 
             <dt>Data</dt>
-            <dd>PostgreSQL, MongoDB, Redis</dd>
+            <dd>PostgreSQL, Redis &mdash; schema design, migrations, query optimisation</dd>
 
-            <dt>Infra &amp; tools</dt>
-            <dd>Docker, Kubernetes, Temporal, Celery, SAML, OAuth 2.0</dd>
+            <dt>Infra</dt>
+            <dd>AWS (Lambda, SQS, S3), Docker, Kubernetes, GitHub Actions, Sentry</dd>
+
+            <dt>Auth</dt>
+            <dd>SAML, OAuth 2.0 / OIDC, SSO &amp; identity federation, MFA, JWT</dd>
         </dl>
     </section>
 
@@ -275,7 +371,7 @@
                 <h3>B.E. Computer Science <span class="dot">&middot;</span> <span class="company">Gujarat Technological University</span></h3>
                 <span class="period">2017 &ndash; 2021</span>
             </header>
-            <p class="role-summary">CGPA 9.25 / 10.0. Essential Google Cloud Infrastructure: Foundation (2020). Regional qualifier, Gujarat Industrial Hackathon (2018).</p>
+            <p class="role-summary">GPA 9.25 / 10.0. Essential Google Cloud Infrastructure: Foundation (2020). Regional qualifier, Gujarat Industrial Hackathon (2018).</p>
         </article>
     </section>
 
