@@ -34,9 +34,11 @@
         <h2><span class="label-prefix">//</span> Now</h2>
         <p class="now-date">August 2026</p>
         <p>
-            Leading the design of a unified OIDC identity provider at Toddle &mdash;
-            authorization-code flow, silent SSO, and the account-linking edge cases that only
-            surface once real users turn out to have three accounts they&rsquo;d forgotten about.
+            Watching the Jenkins production pipeline changes I shipped settle in, and pulling
+            latency down on features that now have to hold up for 32k+ users. Alongside that
+            I&rsquo;m scoping two things: an auth dashboard, so an org can see its own
+            authentication stats, and a more robust session management system &mdash; which is one
+            of those problems that looks solved until you look at it closely.
         </p>
     </section>
 
@@ -46,26 +48,40 @@
         <article class="case-study">
             <header class="case-header">
                 <h3>Becoming an Identity Provider</h3>
-                <span class="period">Toddle &middot; 2024&ndash;present</span>
+                <span class="period">Toddle &middot; 2026</span>
             </header>
             <p>
-                Toddle spent years on one side of the federation boundary: a service provider,
-                consuming assertions from Google, Microsoft, Okta, and whatever a district
-                happened to run. But schools increasingly wanted single sign-on <em>into</em>
-                partner tools, and our own growing set of internal properties each needed an
-                auth surface. Consuming identity was no longer enough &mdash; we had to issue it.
+                Like nearly every SaaS product, Toddle sat on one side of a login: the side that
+                asks. We took assertions from Google, Microsoft, Okta, whatever a district happened
+                to run, and that was enough as long as people only needed to get <em>into</em>
+                Toddle. It
+                stopped being enough once the traffic reversed &mdash; partner tools and our own
+                internal applications needed to authenticate people <em>against</em> Toddle.
+                Asking someone else who a user is turns out to be a very different problem from
+                being the one who answers.
             </p>
             <p>
-                We evolved the SSO platform into a full identity provider, issuing SAML assertions
-                and OAuth tokens to third-party and internal applications, and extended platform
-                sign-in to internal company properties through a global OAuth audience. I&rsquo;m
-                now leading the design of a unified OIDC provider on top of that: I authored the
-                full design spec &mdash; authorization-code flow, silent SSO, verified-email
-                account linking &mdash; and I&rsquo;m guiding the implementation.
+                I built the SAML half of that: Toddle as an identity provider, issuing signed
+                assertions to third-party service providers, with the metadata exchange,
+                certificate handling, and per-relying-party configuration that comes with it.
+                Sign-on starts at Toddle: the user authenticates with us, picks the application,
+                and we confirm they actually belong to the organisation that relying party is
+                configured for before anything gets signed &mdash; so what Toddle is willing to
+                assert comes out of the trust configuration rather than out of whoever happens to
+                be asking. For the OIDC half
+                I did the planning and scoping, wrote the design spec &mdash; authorization-code
+                flow, silent SSO, account linking &mdash; and I&rsquo;m guiding the implementation
+                as it lands.
+            </p>
+            <p>
+                The interesting part wasn&rsquo;t the protocol work. As a service provider you can
+                lean on someone else&rsquo;s judgment about who a user is; as an identity provider,
+                everyone downstream leans on yours. Most of the hard decisions came out of that
+                shift &mdash; from consuming trust to issuing it.
             </p>
 
-            <figure class="diagram" aria-labelledby="oidc-fig-caption">
-                <svg viewBox="0 0 640 300" role="img" aria-label="OIDC authorization-code flow with Toddle acting as the identity provider" xmlns="http://www.w3.org/2000/svg">
+            <figure class="diagram" aria-labelledby="idp-fig-caption">
+                <svg viewBox="0 0 640 280" role="img" aria-label="IdP-initiated SAML flow with Toddle acting as the identity provider" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                             <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
@@ -74,70 +90,66 @@
 
                     <g class="lane-label">
                         <text x="70" y="22" text-anchor="middle">User</text>
-                        <text x="320" y="22" text-anchor="middle">Third-party app</text>
-                        <text x="570" y="22" text-anchor="middle">Toddle (IdP)</text>
+                        <text x="320" y="22" text-anchor="middle">Toddle (IdP)</text>
+                        <text x="570" y="22" text-anchor="middle">Third-party (SP)</text>
                     </g>
 
                     <g class="lifeline">
-                        <line x1="70" y1="36" x2="70" y2="284"/>
-                        <line x1="320" y1="36" x2="320" y2="284"/>
-                        <line x1="570" y1="36" x2="570" y2="284"/>
+                        <line x1="70" y1="36" x2="70" y2="268"/>
+                        <line x1="320" y1="36" x2="320" y2="268"/>
+                        <line x1="570" y1="36" x2="570" y2="268"/>
                     </g>
 
                     <g class="flow">
-                        <line x1="70" y1="62" x2="320" y2="62" marker-end="url(#arr2)"/>
-                        <text x="195" y="56" text-anchor="middle" class="flow-label">GET /login</text>
+                        <line x1="70" y1="64" x2="320" y2="64" marker-end="url(#arr2)"/>
+                        <text x="195" y="58" text-anchor="middle" class="flow-label">sign in</text>
                     </g>
 
                     <g class="flow">
-                        <line x1="320" y1="96" x2="70" y2="96" marker-end="url(#arr2)"/>
-                        <text x="195" y="90" text-anchor="middle" class="flow-label">302 &mdash; authz request</text>
+                        <line x1="70" y1="98" x2="320" y2="98" marker-end="url(#arr2)"/>
+                        <text x="195" y="92" text-anchor="middle" class="flow-label">select app</text>
+                    </g>
+
+                    <g class="note">
+                        <rect x="200" y="112" width="240" height="34" rx="3"/>
+                        <text x="320" y="134" text-anchor="middle">check org &harr; app &middot; sign</text>
                     </g>
 
                     <g class="flow">
-                        <line x1="70" y1="130" x2="570" y2="130" marker-end="url(#arr2)"/>
-                        <text x="320" y="124" text-anchor="middle" class="flow-label">authenticate &mdash; or silent SSO</text>
+                        <line x1="320" y1="180" x2="70" y2="180" marker-end="url(#arr2)"/>
+                        <text x="195" y="174" text-anchor="middle" class="flow-label">auto-POST form</text>
                     </g>
 
                     <g class="flow">
-                        <line x1="570" y1="164" x2="70" y2="164" marker-end="url(#arr2)"/>
-                        <text x="320" y="158" text-anchor="middle" class="flow-label">302 &mdash; authorization code</text>
+                        <line x1="70" y1="214" x2="570" y2="214" marker-end="url(#arr2)"/>
+                        <text x="320" y="208" text-anchor="middle" class="flow-label">POST /acs &mdash; signed SAMLResponse</text>
                     </g>
 
-                    <g class="flow">
-                        <line x1="70" y1="198" x2="320" y2="198" marker-end="url(#arr2)"/>
-                        <text x="195" y="192" text-anchor="middle" class="flow-label">GET /callback?code</text>
+                    <g class="note">
+                        <rect x="400" y="228" width="230" height="34" rx="3"/>
+                        <text x="515" y="250" text-anchor="middle">verify sig &middot; create session</text>
                     </g>
-
-                    <g class="flow backchannel">
-                        <line x1="320" y1="238" x2="570" y2="238" marker-end="url(#arr2)"/>
-                        <text x="445" y="232" text-anchor="middle" class="flow-label">POST /token</text>
-                    </g>
-
-                    <g class="flow backchannel">
-                        <line x1="570" y1="270" x2="320" y2="270" marker-end="url(#arr2)"/>
-                        <text x="445" y="264" text-anchor="middle" class="flow-label">id_token &middot; access_token</text>
-                    </g>
-
-                    <text x="632" y="256" text-anchor="end" class="side-note">back channel</text>
                 </svg>
-                <figcaption id="oidc-fig-caption">
-                    Same protocol family as the diagram below &mdash; opposite side of the arrow.
+                <figcaption id="idp-fig-caption">
+                    IdP-initiated SAML &mdash; the assertion is unsolicited, so there&rsquo;s no
+                    AuthnRequest to correlate against. Same protocol as the diagram below, opposite
+                    side of the arrow.
                 </figcaption>
             </figure>
 
             <p class="impact">
                 <span class="impact-label">Impact &mdash;</span>
-                Toddle now sits on <strong>both sides of the federation boundary</strong>:
-                consuming external IdPs for school sign-in, and acting as one for third-party
-                and internal applications.
+                Toddle now sits on <strong>both sides of the federation boundary</strong> &mdash;
+                consuming external IdPs for school sign-in, and issuing identity to third-party
+                and internal applications. SAML is shipped; OIDC is being built against the spec
+                I wrote.
             </p>
             <p class="redo">
                 <span class="redo-label">What I&rsquo;d redo &mdash;</span>
-                Account linking. Verified-email linking is the pragmatic choice and it&rsquo;s
-                what we shipped, but it quietly inherits the trust assumptions of whoever
-                verified that email. I&rsquo;d like a stronger story there than
-                &ldquo;the upstream IdP said so.&rdquo;
+                The scope of the first cut. I built the SAML side against a deadline and left some
+                capability out to make it. Nothing load-bearing, and I&rsquo;d make the same trade
+                again &mdash; but a couple of those pieces belong in the initial design rather than
+                in the follow-up queue, and I&rsquo;d argue harder for them up front next time.
             </p>
         </article>
 
@@ -147,12 +159,16 @@
                 <span class="period">Toddle &middot; 2023&ndash;2024</span>
             </header>
             <p>
-                When I picked this up, &ldquo;SSO&rdquo; at Toddle meant Google or Microsoft OAuth,
-                hardcoded. Anything else &mdash; Okta, Azure AD over SAML, ADFS, a district&rsquo;s
-                in-house IdP &mdash; was a bespoke engineering project. On top of that, every school
+                When I picked this up, SSO at Toddle covered the two providers that mattered most
+                at the time: Google and Microsoft OAuth. That had been the right call for years,
+                but the ground had shifted &mdash; schools were increasingly arriving on Okta,
+                Azure AD over SAML, ADFS, or a district&rsquo;s in-house IdP, and each of those was
+                still a bespoke engineering project. On top of that, every school
                 shared one global login page, so as the provider list grew the page got crowded, and
                 enabling an already-supported provider for a school <em>still</em> required an
-                engineer to flip a flag in the database.
+                engineer &mdash; usually a flag flip in the database, sometimes a small backend
+                change alongside it. Individually trivial, but it put a ticket, a review, and a
+                deploy on the critical path of a school going live.
             </p>
             <p>
                 I built the company&rsquo;s first generic SAML and OAuth integrations, working
@@ -245,10 +261,10 @@
             </header>
             <p>
                 Long-running work &mdash; data syncs, bulk exports, migrations &mdash; ran on a
-                homegrown long-running-task architecture that was hard to observe and harder to
-                recover. Retries were ad hoc, partial failures left inconsistent state, and every
-                team that needed a background job reinvented the same scaffolding slightly
-                differently.
+                homegrown architecture that predated the scale we were putting through it. It was
+                hard to observe and harder to recover: retries were ad hoc, partial failures could
+                leave inconsistent state, and each team that needed a background job ended up
+                building its own scaffolding around the same set of problems.
             </p>
             <p>
                 I designed and built a workflow orchestration framework on Temporal with progress
@@ -280,8 +296,9 @@
                 Onboarding a school meant migrating student, staff, parent, and class data out of
                 their SIS &mdash; PowerSchool, Clever, Veracross, iSAMS, or something in-house &mdash;
                 and into Toddle. Previously that meant an engineer running database updates by hand,
-                usually across several rounds of back-and-forth to fix data-shape issues. Slow for
-                the school, expensive for engineering, and a hard ceiling on how fast we could grow.
+                usually across several rounds of back-and-forth to fix data-shape issues. That was
+                workable at the volumes we&rsquo;d been onboarding, but it was slow for the school,
+                expensive for engineering, and a ceiling on how fast we could grow.
             </p>
             <p>
                 I worked on a self-serve rostering module: schools configure their own migration,
@@ -350,17 +367,23 @@
             <dt>Languages</dt>
             <dd>JavaScript / TypeScript, Python</dd>
 
-            <dt>Backend</dt>
-            <dd>Node.js, Express, GraphQL, REST, gRPC, Temporal, Celery, Django</dd>
+            <dt>Backend &amp; APIs</dt>
+            <dd>Node.js, Express, GraphQL, REST, gRPC, Django, Celery, Temporal, ReactJS</dd>
+
+            <dt>Architecture</dt>
+            <dd>Microservices, event-driven and async systems, distributed system and API design, workflow orchestration, multi-region delivery</dd>
 
             <dt>Data</dt>
             <dd>PostgreSQL, Redis &mdash; schema design, migrations, query optimisation</dd>
 
-            <dt>Infra</dt>
-            <dd>AWS (Lambda, SQS, S3), Docker, Kubernetes, GitHub Actions, Sentry</dd>
+            <dt>Cloud &amp; Infra</dt>
+            <dd>AWS (Lambda, SQS, S3), Docker, Kubernetes, Linux, Git, Jenkins, GitHub Actions, CI/CD, Sentry</dd>
 
-            <dt>Auth</dt>
+            <dt>Auth &amp; Security</dt>
             <dd>SAML, OAuth 2.0 / OIDC, SSO &amp; identity federation, MFA, JWT</dd>
+
+            <dt>Practice</dt>
+            <dd>Design specs and scoping, code review, mentoring, production incident response, Agile / Scrum</dd>
         </dl>
     </section>
 
